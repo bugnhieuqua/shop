@@ -1,0 +1,48 @@
+@model Shop.Models.Category
+@{
+    ViewData["Title"] = "Thêm danh mục";
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Thêm danh mục",
+    "Tạo nhóm sản phẩm mới để phân loại hàng hoá",
+    (string?)null,
+    (string?)null
+))
+
+<form asp-action="Create" method="post" class="form-card" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="form-alert form-alert--danger"></div>
+
+    <div class="form-group">
+        <label asp-for="Name" class="form-label">
+            Tên danh mục <span class="req" aria-hidden="true">*</span>
+        </label>
+        <input asp-for="Name" class="input" autofocus placeholder="VD: Điện thoại, Laptop, Phụ kiện..." />
+        <span asp-validation-for="Name" class="form-error"></span>
+        <p class="form-hint">Tối đa 100 ký tự.</p>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="input" rows="3" placeholder="Mô tả ngắn gọn về nhóm sản phẩm này..."></textarea>
+        <span asp-validation-for="Description" class="form-error"></span>
+        <p class="form-hint">Không bắt buộc. Tối đa 500 ký tự.</p>
+    </div>
+
+    <div class="form-actions">
+        <a href="@Url.Action("Category", "Home")" class="btn btn--ghost">Huỷ</a>
+        <button type="submit" class="btn btn--primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Thêm danh mục</span>
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

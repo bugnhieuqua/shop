@@ -1,0 +1,177 @@
+@model List<Shop.Models.InvoiceDetail>
+@{
+    var invoices = ViewBag.Invoices as List<Shop.Models.Invoice> ?? new List<Shop.Models.Invoice>();
+    var selectedId = ViewBag.SelectedInvoiceId as int?;
+    var selectedInvoice = selectedId.HasValue ? invoices.FirstOrDefault(i => i.Id == selectedId.Value) : null;
+    var products = Shop.Data.SeedData.Products;
+    var employees = Shop.Data.SeedData.Employees;
+
+    ViewData["Title"] = selectedInvoice != null 
+        ? $"Chi tiết hóa đơn #{selectedInvoice.Id}" 
+        : "Chi tiết tất cả hóa đơn";
+
+    decimal subTotal = Model.Sum(d => d.LineTotal);
+}
+
+<!-- Breadcrumb & Back Navigation -->
+<nav aria-label="Đường dẫn điều hướng" style="margin-bottom: var(--space-4);">
+    <div style="display: flex; align-items: center; gap: var(--space-2); font-size: 0.875rem;">
+        <a asp-action="Invoice" style="color: var(--color-muted); text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-1);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Quay lại danh sách hóa đơn
+        </a>
+        <span style="color: var(--color-muted);" aria-hidden="true">/</span>
+        <span style="color: var(--color-text); font-weight: 600;">
+            @(selectedInvoice != null ? $"Hóa đơn #{selectedInvoice.Id}" : "Tất cả chi tiết")
+        </span>
+    </div>
+</nav>
+
+@await Html.PartialAsync("_PageHeader", (
+    selectedInvoice != null ? $"Chi tiết hóa đơn #{selectedInvoice.Id}" : "Chi tiết đơn hàng",
+    selectedInvoice != null 
+        ? $"Khách hàng: {selectedInvoice.CustomerName} • Ngày {selectedInvoice.CreatedAt:dd/MM/yyyy HH:mm}" 
+        : "Toàn bộ danh sách sản phẩm đã xuất bán trong các đơn hàng",
+    "In phiếu",
+    "javascript:window.print()"
+))
+
+<!-- Filter Invoice Switcher -->
+<div class="toolbar" style="margin-bottom: var(--space-4);">
+    <div class="toolbar__group">
+        <label for="invoiceSwitcher" style="font-size: 0.875rem; font-weight: 600; color: var(--color-muted);">Lọc theo hóa đơn:</label>
+        <select class="select" id="invoiceSwitcher" onchange="if(this.value){ location.href = '@Url.Action("InvoiceDetail", "Home")?invoiceId=' + this.value; } else { location.href = '@Url.Action("InvoiceDetail", "Home")'; }">
+            <option value="">-- Tất cả hóa đơn --</option>
+            @foreach (var inv in invoices)
+            {
+                if (selectedId == inv.Id)
+                {
+                    <option value="@inv.Id" selected="selected">#HD-@inv.Id.ToString("D4") - @inv.CustomerName (@inv.TotalAmount.ToString("N0") ₫)</option>
+                }
+                else
+                {
+                    <option value="@inv.Id">#HD-@inv.Id.ToString("D4") - @inv.CustomerName (@inv.TotalAmount.ToString("N0") ₫)</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+
+@if (selectedInvoice != null)
+{
+    var emp = employees.FirstOrDefault(e => e.Id == selectedInvoice.EmployeeId);
+    <!-- Customer & Order Meta Information Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-5);">
+        <div class="card" style="padding: var(--space-4);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted); font-weight: 600; margin-bottom: var(--space-1);">Khách hàng</div>
+            <div style="font-size: 1.125rem; font-weight: 700; color: var(--color-text);">@selectedInvoice.CustomerName</div>
+            <div style="font-size: 0.875rem; color: var(--color-muted); margin-top: 2px;">SĐT: @(selectedInvoice.CustomerPhone ?? "Không cung cấp")</div>
+        </div>
+
+        <div class="card" style="padding: var(--space-4);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted); font-weight: 600; margin-bottom: var(--space-1);">Nhân viên phụ trách</div>
+            <div style="font-size: 1.125rem; font-weight: 700; color: var(--color-text);">@(emp?.FullName ?? "N/A")</div>
+            <div style="font-size: 0.875rem; color: var(--color-muted); margin-top: 2px;">Email: @(emp?.Email ?? "N/A")</div>
+        </div>
+
+        <div class="card" style="padding: var(--space-4);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted); font-weight: 600; margin-bottom: var(--space-1);">Thời gian tạo</div>
+            <div style="font-size: 1.125rem; font-weight: 700; color: var(--color-text);">@selectedInvoice.CreatedAt.ToString("dd/MM/yyyy")</div>
+            <div style="font-size: 0.875rem; color: var(--color-muted); margin-top: 2px;">Giờ: @selectedInvoice.CreatedAt.ToString("HH:mm:ss")</div>
+        </div>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    @await Html.PartialAsync("_EmptyState", (
+        "empty",
+        "Hóa đơn trống",
+        "Không tìm thấy dòng sản phẩm nào trong hóa đơn này."
+    ))
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive table-responsive-cards">
+            <table class="data-table">
+                <caption class="sr-only">Chi tiết các dòng sản phẩm trong hóa đơn</caption>
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 80px;">STT</th>
+                        @if (selectedInvoice == null)
+                        {
+                            <th scope="col">Mã HĐ</th>
+                        }
+                        <th scope="col">Sản phẩm</th>
+                        <th scope="col" class="text-end" style="width: 120px;">Số lượng</th>
+                        <th scope="col" class="text-end" style="width: 160px;">Đơn giá</th>
+                        <th scope="col" class="text-end" style="width: 180px;">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int idx = 1; }
+                    @foreach (var item in Model)
+                    {
+                        var prod = products.FirstOrDefault(p => p.Id == item.ProductId);
+                        <tr>
+                            <td data-label="STT">@(idx++)</td>
+                            @if (selectedInvoice == null)
+                            {
+                                <td data-label="Mã HĐ">
+                                    <a asp-action="InvoiceDetail" asp-route-invoiceId="@item.InvoiceId" style="color: var(--color-primary); font-weight: 600;">
+                                        #HD-@item.InvoiceId.ToString("D4")
+                                    </a>
+                                </td>
+                            }
+                            <td data-label="Sản phẩm">
+                                <div class="cell-product">
+                                    <img class="thumb"
+                                         src="~/images/products/@(prod?.ImageFileName ?? "placeholder.png")"
+                                         alt=""
+                                         width="40"
+                                         height="40"
+                                         loading="lazy" />
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--color-text);">@(prod?.Name ?? "Sản phẩm #" + item.ProductId)</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-muted);">Mã SP: @item.ProductId</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Số lượng" class="text-end">
+                                <span class="badge badge--muted">@item.Quantity cái</span>
+                            </td>
+                            <td data-label="Đơn giá" class="text-end">
+                                @item.UnitPrice.ToString("N0") ₫
+                            </td>
+                            <td data-label="Thành tiền" class="text-end" style="font-weight: 600; color: var(--color-text);">
+                                @item.LineTotal.ToString("N0") ₫
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Panel -->
+        <div style="display: flex; justify-content: flex-end; padding: var(--space-5); background: #F8FAFC; border-top: 1px solid var(--color-border);">
+            <div style="width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: var(--space-2);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--color-muted);">
+                    <span>Tạm tính</span>
+                    <span style="font-weight: 600; color: var(--color-text);">@subTotal.ToString("N0") ₫</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--color-muted);">
+                    <span>Chiết khấu / Giảm giá</span>
+                    <span style="font-weight: 600; color: var(--color-success-text);">0 ₫</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-3); margin-top: var(--space-2); border-top: 2px dashed var(--color-border); font-size: 1.125rem; font-weight: 700; color: var(--color-primary);">
+                    <span>TỔNG CỘNG</span>
+                    <span>@subTotal.ToString("N0") ₫</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}

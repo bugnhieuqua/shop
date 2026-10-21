@@ -1,0 +1,140 @@
+@model Shop.ViewModels.InvoiceCreateVm
+@{
+    ViewData["Title"] = "Tạo hoá đơn";
+    var employees = ViewBag.Employees as List<Shop.Models.Employee> ?? new List<Shop.Models.Employee>();
+    var products  = ViewBag.Products  as List<Shop.Models.Product>  ?? new List<Shop.Models.Product>();
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Tạo hoá đơn",
+    "Lập hoá đơn mới cho khách hàng",
+    (string?)null,
+    (string?)null
+))
+
+<form asp-action="Create" method="post" class="form-card" novalidate id="invoiceForm"
+      data-products='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(products.Select(p => new { id = p.Id, name = p.Name, price = p.Price, stock = p.StockQuantity })))'>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="form-alert form-alert--danger"></div>
+
+    <!-- Section 1: Thông tin chung -->
+    <fieldset class="form-section">
+        <legend>Thông tin hoá đơn</legend>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="EmployeeId" class="form-label">
+                    Nhân viên lập <span class="req" aria-hidden="true">*</span>
+                </label>
+                <select asp-for="EmployeeId" class="input">
+                    <option value="">— Chọn nhân viên —</option>
+                    @foreach (var e in employees)
+                    {
+                        <option value="@e.Id">@e.FullName</option>
+                    }
+                </select>
+                <span asp-validation-for="EmployeeId" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CustomerName" class="form-label">
+                    Khách hàng <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="CustomerName" class="input" autofocus placeholder="VD: Phạm Minh" autocomplete="name" />
+                <span asp-validation-for="CustomerName" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CustomerPhone" class="form-label">SĐT khách</label>
+                <input asp-for="CustomerPhone" class="input" type="tel" placeholder="VD: 0933 111 222" autocomplete="tel" />
+                <span asp-validation-for="CustomerPhone" class="form-error"></span>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Section 2: Chi tiết sản phẩm -->
+    <fieldset class="form-section">
+        <legend>Chi tiết sản phẩm</legend>
+
+        <div class="line-table" id="lineTable">
+            <div class="line-table__head">
+                <span>Sản phẩm</span>
+                <span>Số lượng</span>
+                <span class="text-end">Đơn giá</span>
+                <span class="text-end">Thành tiền</span>
+                <span aria-hidden="true"></span>
+            </div>
+
+            <div class="line-table__body" id="lineBody">
+                @for (int i = 0; i < Model.Lines.Count; i++)
+                {
+                    <div class="line-row" data-index="@i">
+                        <div class="form-group">
+                            <label class="sr-only" for="Lines_@(i)__ProductId">Sản phẩm dòng @(i + 1)</label>
+                            <select asp-for="Lines[@i].ProductId" class="input line-row__product" aria-label="Sản phẩm dòng @(i + 1)">
+                                <option value="">— Chọn sản phẩm —</option>
+                                @foreach (var p in products)
+                                {
+                                    <option value="@p.Id" data-price="@p.Price" data-stock="@p.StockQuantity">
+                                        @p.Name — @p.Price.ToString("N0") ₫ (còn @p.StockQuantity)
+                                    </option>
+                                }
+                            </select>
+                            <span asp-validation-for="Lines[@i].ProductId" class="form-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="sr-only" for="Lines_@(i)__Quantity">Số lượng dòng @(i + 1)</label>
+                            <input asp-for="Lines[@i].Quantity" type="number" min="1" class="input line-row__qty text-end" aria-label="Số lượng dòng @(i + 1)" />
+                            <span asp-validation-for="Lines[@i].Quantity" class="form-error"></span>
+                        </div>
+
+                        <div class="line-row__price text-end" data-role="unit-price">0 ₫</div>
+                        <div class="line-row__total text-end" data-role="line-total">0 ₫</div>
+
+                        <button type="button" class="btn-icon btn-icon--danger line-row__remove" aria-label="Xoá dòng @(i + 1)" data-remove-row>×</button>
+
+                        <input type="hidden" asp-for="Lines[@i].UnitPrice" data-role="unit-price-input" />
+                    </div>
+                }
+            </div>
+
+            <div>
+                <button type="button" class="btn btn--ghost btn--sm" id="addLine">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Thêm dòng</span>
+                </button>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Section 3: Tổng kết -->
+    <div class="summary-panel">
+        <div class="summary-panel__row">
+            <span>Tạm tính</span>
+            <span id="subtotal">0 ₫</span>
+        </div>
+        <div class="summary-panel__row summary-panel__row--grand">
+            <span>TỔNG CỘNG</span>
+            <strong id="grandTotal">0 ₫</strong>
+        </div>
+    </div>
+
+    <div class="form-actions form-actions--sticky">
+        <a href="@Url.Action("Invoice", "Home")" class="btn btn--ghost">Huỷ</a>
+        <button type="submit" class="btn btn--primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Tạo hoá đơn</span>
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/invoice-create.js" asp-append-version="true"></script>
+}

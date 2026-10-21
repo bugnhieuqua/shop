@@ -1,0 +1,90 @@
+@model List<Shop.Models.Invoice>
+@{
+    ViewData["Title"] = "Quản lý hóa đơn";
+    var totalSum = Model.Sum(i => i.TotalAmount);
+    var employees = Shop.Data.SeedData.Employees;
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Hóa đơn",
+    $"{Model.Count} giao dịch đã ghi nhận",
+    "Tạo hóa đơn mới",
+    Url.Action("Create", "Invoice")
+))
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <div class="toolbar__group">
+        <input class="input" type="search" id="invoiceSearch" placeholder="Tìm theo mã HĐ, tên khách hàng, SĐT..." aria-label="Tìm kiếm hóa đơn" style="min-width: 260px;" />
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    @await Html.PartialAsync("_EmptyState", (
+        "empty",
+        "Chưa có hóa đơn nào",
+        "Chưa có đơn hàng phát sinh trong khoảng thời gian này."
+    ))
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive table-responsive-cards">
+            <table class="data-table">
+                <caption class="sr-only">Danh sách hóa đơn bán hàng</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Mã HĐ</th>
+                        <th scope="col">Thời gian</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Nhân viên lập</th>
+                        <th scope="col" class="text-end">Tổng tiền</th>
+                        <th scope="col" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var inv in Model)
+                    {
+                        var empName = employees.FirstOrDefault(e => e.Id == inv.EmployeeId)?.FullName ?? "Nhân viên #" + inv.EmployeeId;
+
+                        <tr>
+                            <td data-label="Mã HĐ">
+                                <strong>#HD-@inv.Id.ToString("D4")</strong>
+                            </td>
+                            <td data-label="Thời gian">
+                                <div>@inv.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                <div style="font-size: 0.75rem; color: var(--color-muted);">@inv.CreatedAt.ToString("HH:mm")</div>
+                            </td>
+                            <td data-label="Khách hàng">
+                                <div style="font-weight: 600; color: var(--color-text);">@inv.CustomerName</div>
+                                @if (!string.IsNullOrEmpty(inv.CustomerPhone))
+                                {
+                                    <div style="font-size: 0.8125rem; color: var(--color-muted);">@inv.CustomerPhone</div>
+                                }
+                            </td>
+                            <td data-label="Nhân viên">@empName</td>
+                            <td data-label="Tổng tiền" class="text-end" style="font-weight: 700; color: var(--color-primary);">
+                                @inv.TotalAmount.ToString("N0") ₫
+                            </td>
+                            <td data-label="Thao tác" class="text-end">
+                                <a class="btn btn--outline btn--sm" asp-action="InvoiceDetail" asp-route-invoiceId="@inv.Id">
+                                    Chi tiết
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sticky Total Summary Bar -->
+        <div class="sticky-total-bar">
+            <span>Tổng cộng: @Model.Count hóa đơn</span>
+            <span>Doanh thu: <span class="total-amount-highlight">@totalSum.ToString("N0") ₫</span></span>
+        </div>
+    </div>
+}

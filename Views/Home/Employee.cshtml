@@ -1,0 +1,118 @@
+@model List<Shop.Models.Employee>
+@{
+    ViewData["Title"] = "Quản lý nhân viên";
+    
+    // Helper function to pick a deterministic vibrant color from name
+    string GetAvatarColor(string name)
+    {
+        var colors = new[] { "#2563EB", "#7C3AED", "#059669", "#D97706", "#DB2777", "#0891B2" };
+        int hash = Math.Abs(name.GetHashCode());
+        return colors[hash % colors.Length];
+    }
+
+    string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "U";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 0 ? parts[^1][0].ToString().ToUpper() : "U";
+    }
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Nhân viên",
+    $"{Model.Count} nhân viên trong hệ thống",
+    "Thêm nhân viên",
+    Url.Action("Create", "Employee")
+))
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <div class="toolbar__group">
+        <input class="input" type="search" id="employeeSearch" placeholder="Tìm theo tên, email, SĐT..." aria-label="Tìm kiếm nhân viên" style="max-width: 320px;" />
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    @await Html.PartialAsync("_EmptyState", (
+        "empty",
+        "Chưa có nhân viên",
+        "Thêm thông tin nhân viên để phân quyền và theo dõi ca làm việc."
+    ))
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive table-responsive-cards">
+            <table class="data-table">
+                <caption class="sr-only">Danh sách nhân viên</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Nhân viên</th>
+                        <th scope="col">Liên hệ</th>
+                        <th scope="col">Tài khoản</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var emp in Model)
+                    {
+                        var avatarColor = GetAvatarColor(emp.FullName);
+                        var initial = GetInitials(emp.FullName);
+
+                        <tr class="@(emp.IsActive ? "" : "row--inactive")">
+                            <td data-label="Nhân viên">
+                                <div class="cell-product">
+                                    <div class="avatar" style="background-color: @avatarColor;" aria-hidden="true">
+                                        @initial
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--color-text);">@emp.FullName</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-muted);">Mã: NV-@emp.Id.ToString("D3")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Liên hệ">
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    @if (!string.IsNullOrEmpty(emp.Phone))
+                                    {
+                                        <a href="tel:@emp.Phone" style="color: var(--color-primary); text-decoration: none; font-size: 0.875rem;">
+                                            @emp.Phone
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(emp.Email))
+                                    {
+                                        <a href="mailto:@emp.Email" style="color: var(--color-muted); text-decoration: none; font-size: 0.8125rem;">
+                                            @emp.Email
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                            <td data-label="Tài khoản">
+                                <code style="padding: 2px 6px; background: #F1F5F9; border-radius: var(--radius-input); font-size: 0.8125rem; color: var(--color-text);">
+                                    @(emp.UserId ?? "Chưa liên kết")
+                                </code>
+                            </td>
+                            <td data-label="Trạng thái">
+                                @if (emp.IsActive)
+                                {
+                                    @await Html.PartialAsync("_StatusBadge", ("success", "Đang làm việc"))
+                                }
+                                else
+                                {
+                                    @await Html.PartialAsync("_StatusBadge", ("muted", "Đã nghỉ"))
+                                }
+                            </td>
+                            <td data-label="Thao tác" class="text-end">
+                                <a href="@Url.Action("Edit", "Employee", new { id = emp.Id })" class="btn btn--outline btn--sm" aria-label="Chỉnh sửa nhân viên @emp.FullName">
+                                    Sửa
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

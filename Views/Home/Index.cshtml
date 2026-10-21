@@ -1,0 +1,101 @@
+@{
+    ViewData["Title"] = "Tổng quan";
+    int productCount = ViewBag.ProductCount != null ? (int)ViewBag.ProductCount : 0;
+    int employeeCount = ViewBag.EmployeeCount != null ? (int)ViewBag.EmployeeCount : 0;
+    int invoiceCount = ViewBag.InvoiceCount != null ? (int)ViewBag.InvoiceCount : 0;
+    string revenue = ViewBag.Revenue != null ? ((decimal)ViewBag.Revenue).ToString("N0") + " ₫" : "0 ₫";
+    var latestInvoices = ViewBag.LatestInvoices as List<Shop.Models.Invoice> ?? new List<Shop.Models.Invoice>();
+    string invoiceUrl = Url.Action("Invoice", "Home") ?? "/Home/Invoice";
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Tổng quan",
+    "Chào buổi sáng, An — Cập nhật dữ liệu thời gian thực",
+    "Tạo hóa đơn",
+    Url.Action("Create", "Invoice") ?? "/Invoice/Create"
+))
+
+<!-- Stats KPI Grid -->
+<section class="stats-grid" aria-label="Thống kê tổng quan">
+    @await Html.PartialAsync("_StatCard", (
+        "Sản phẩm",
+        productCount.ToString(),
+        "Kho hàng sẵn sàng",
+        "<svg viewBox='0 0 24 24' width='22' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'></path></svg>"
+    ))
+
+    @await Html.PartialAsync("_StatCard", (
+        "Nhân viên",
+        employeeCount.ToString(),
+        "Đang hoạt động",
+        "<svg viewBox='0 0 24 24' width='22' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'></path><circle cx='9' cy='7' r='4'></circle><path d='M23 21v-2a4 4 0 0 0-3-3.87'></path><path d='M16 3.13a4 4 0 0 1 0 7.75'></path></svg>"
+    ))
+
+    @await Html.PartialAsync("_StatCard", (
+        "Hóa đơn",
+        invoiceCount.ToString(),
+        "Đã hoàn thành",
+        "<svg viewBox='0 0 24 24' width='22' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'></path><polyline points='14 2 14 8 20 8'></polyline><line x1='16' y1='13' x2='8' y2='13'></line><line x1='16' y1='17' x2='8' y2='17'></line></svg>"
+    ))
+
+    @await Html.PartialAsync("_StatCard", (
+        "Doanh thu",
+        revenue,
+        "Tháng này",
+        "<svg viewBox='0 0 24 24' width='22' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>"
+    ))
+</section>
+
+<!-- Recent Invoices Section -->
+<div class="card">
+    <div class="card-body" style="padding-bottom: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text);">Hóa đơn gần đây</h2>
+            <a class="btn btn--outline btn--sm" asp-action="Invoice">Xem tất cả</a>
+        </div>
+    </div>
+
+    @if (!latestInvoices.Any())
+    {
+        @await Html.PartialAsync("_EmptyState", (
+            "empty",
+            "Chưa có giao dịch",
+            "Các hóa đơn mới tạo sẽ tự động xuất hiện tại đây."
+        ))
+    }
+    else
+    {
+        <div class="table-responsive table-responsive-cards">
+            <table class="data-table">
+                <caption class="sr-only">Danh sách hóa đơn mới nhất</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Mã HĐ</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Ngày tạo</th>
+                        <th scope="col" class="text-end">Tổng tiền</th>
+                        <th scope="col" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var inv in latestInvoices)
+                    {
+                        <tr>
+                            <td data-label="Mã HĐ"><strong>#@inv.Id</strong></td>
+                            <td data-label="Khách hàng">@inv.CustomerName</td>
+                            <td data-label="Ngày tạo">@inv.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td data-label="Tổng tiền" class="text-end" style="font-weight: 600; color: var(--color-primary);">
+                                @inv.TotalAmount.ToString("N0") ₫
+                            </td>
+                            <td data-label="Thao tác" class="text-end">
+                                <a class="btn btn--outline btn--sm" asp-action="InvoiceDetail" asp-route-invoiceId="@inv.Id">
+                                    Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

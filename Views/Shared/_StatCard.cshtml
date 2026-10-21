@@ -1,0 +1,28 @@
+@model (string Title, string Value, string? Subtitle, string? SvgIcon)
+<div class="stat-card">
+  <div class="stat-card__header">
+    <span class="stat-card__title">@Model.Title</span>
+    <div class="stat-card__icon" aria-hidden="true">
+      @if (!string.IsNullOrEmpty(Model.SvgIcon))
+      {
+        @Html.Raw(Model.SvgIcon)
+      }
+      else
+      {
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      }
+    </div>
+  </div>
+  <div class="stat-card__value">@Model.Value</div>
+  @if (!string.IsNullOrEmpty(Model.Subtitle))
+  {
+    <div class="stat-card__delta">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+      <span>@Model.Subtitle</span>
+    </div>
+  }
+</div>

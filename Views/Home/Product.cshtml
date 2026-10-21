@@ -1,0 +1,108 @@
+@model List<Shop.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    var categories = ViewBag.Categories as List<Shop.Models.Category> ?? new List<Shop.Models.Category>();
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Sản phẩm",
+    $"{Model.Count} sản phẩm trong kho",
+    "Thêm sản phẩm",
+    Url.Action("Create", "Product")
+))
+
+<!-- Toolbar Filter & Search -->
+<div class="toolbar">
+    <div class="toolbar__group">
+        <select class="select" id="categoryFilter" aria-label="Lọc theo danh mục">
+            <option value="">Tất cả danh mục</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+        <input class="input" type="search" id="productSearch" placeholder="Tìm theo tên sản phẩm..." aria-label="Tìm sản phẩm" style="min-width: 240px;" />
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    @await Html.PartialAsync("_EmptyState", (
+        "empty",
+        "Chưa có sản phẩm nào",
+        "Thêm sản phẩm đầu tiên để bắt đầu quản lý danh mục kho hàng."
+    ))
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive table-responsive-cards">
+            <table class="data-table" id="productTable">
+                <caption class="sr-only">Danh sách sản phẩm trong kho</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Sản phẩm</th>
+                        <th scope="col">Danh mục</th>
+                        <th scope="col" class="text-end">Đơn giá</th>
+                        <th scope="col" class="text-end">Tồn kho</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        var catName = categories.FirstOrDefault(c => c.Id == p.CategoryId)?.Name ?? "Chưa phân loại";
+                        var stockType = p.StockQuantity == 0 ? "danger"
+                                      : p.StockQuantity <= 10 ? "warning" : "success";
+                        var stockText = p.StockQuantity == 0 ? "0 (Hết hàng)"
+                                      : p.StockQuantity <= 10 ? $"{p.StockQuantity} (Sắp hết)" : $"{p.StockQuantity} cái";
+
+                        <tr class="@(p.IsActive ? "" : "row--inactive")" data-category="@p.CategoryId">
+                            <td data-label="Sản phẩm">
+                                <div class="cell-product">
+                                    <img class="thumb"
+                                         src="~/images/products/@(p.ImageFileName ?? "placeholder.png")"
+                                         alt=""
+                                         width="40"
+                                         height="40"
+                                         loading="lazy" />
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--color-text);">@p.Name</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-muted);">Mã: SP-@p.Id.ToString("D4")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Danh mục">@catName</td>
+                            <td data-label="Đơn giá" class="text-end" style="font-weight: 600;">
+                                @p.Price.ToString("N0") ₫
+                            </td>
+                            <td data-label="Tồn kho" class="text-end">
+                                @await Html.PartialAsync("_StatusBadge", (stockType, stockText))
+                            </td>
+                            <td data-label="Trạng thái">
+                                @if (!p.IsActive)
+                                {
+                                    @await Html.PartialAsync("_StatusBadge", ("muted", "Ngừng bán"))
+                                }
+                                else if (p.StockQuantity == 0)
+                                {
+                                    @await Html.PartialAsync("_StatusBadge", ("danger", "Tạm hết"))
+                                }
+                                else
+                                {
+                                    @await Html.PartialAsync("_StatusBadge", ("success", "Đang bán"))
+                                }
+                            </td>
+                            <td data-label="Thao tác" class="text-end">
+                                <a href="@Url.Action("Edit", "Product", new { id = p.Id })" class="btn btn--outline btn--sm" aria-label="Chỉnh sửa @p.Name">
+                                    Sửa
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

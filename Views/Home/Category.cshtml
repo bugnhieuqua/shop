@@ -1,0 +1,81 @@
+@model List<Shop.Models.Category>
+@{
+    ViewData["Title"] = "Danh mục sản phẩm";
+    var products = Shop.Data.SeedData.Products;
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Danh mục sản phẩm",
+    "Quản lý các nhóm phân loại hàng hóa",
+    "Thêm danh mục",
+    Url.Action("Create", "Category")
+))
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <div class="toolbar__group">
+        <input class="input" type="search" id="categorySearch" placeholder="Tìm theo tên danh mục..." aria-label="Tìm kiếm danh mục" style="max-width: 320px;" />
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    @await Html.PartialAsync("_EmptyState", (
+        "empty",
+        "Chưa có danh mục",
+        "Tạo danh mục đầu tiên để phân nhóm và quản lý sản phẩm."
+    ))
+}
+else
+{
+    <div class="category-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4);">
+        @foreach (var cat in Model)
+        {
+            var pCount = products.Count(p => p.CategoryId == cat.Id);
+            <div class="card category-item" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-3);">
+                        <div style="width: 44px; height: 44px; border-radius: var(--radius-input); background: var(--color-primary-soft); color: var(--color-primary); display: flex; align-items: center; justify-content: center;" aria-hidden="true">
+                            @if (cat.Id == 1)
+                            {
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                            }
+                            else if (cat.Id == 2)
+                            {
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="2" y1="20" x2="22" y2="20"></line>
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                </svg>
+                            }
+                        </div>
+                        <span class="badge badge--muted">@pCount sản phẩm</span>
+                    </div>
+
+                    <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text); margin-bottom: var(--space-2);">@cat.Name</h2>
+                    <p style="font-size: 0.875rem; color: var(--color-muted); line-height: 1.5; margin-bottom: var(--space-4);">
+                        @(cat.Description ?? "Chưa có mô tả chi tiết cho danh mục này.")
+                    </p>
+                </div>
+
+                <div style="padding: var(--space-3) var(--space-5); background: #F8FAFC; border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                    <a class="btn btn--outline btn--sm" asp-controller="Home" asp-action="Product" asp-route-categoryId="@cat.Id">
+                        Xem sản phẩm
+                    </a>
+                    <button class="btn btn--outline btn--sm" type="button" aria-label="Chỉnh sửa danh mục @cat.Name">
+                        Sửa
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}

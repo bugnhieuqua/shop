@@ -1,0 +1,20 @@
+@model (string Title, string? Subtitle, string? ActionText, string? ActionUrl)
+<header class="page-header">
+  <div>
+    <h1 class="page-header__title">@Model.Title</h1>
+    @if (!string.IsNullOrEmpty(Model.Subtitle))
+    {
+      <p class="page-header__subtitle">@Model.Subtitle</p>
+    }
+  </div>
+  @if (!string.IsNullOrEmpty(Model.ActionText))
+  {
+    <a class="btn btn--primary" href="@(Model.ActionUrl ?? "#")">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>@Model.ActionText</span>
+    </a>
+  }
+</header>

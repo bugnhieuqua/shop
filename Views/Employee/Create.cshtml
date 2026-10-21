@@ -1,0 +1,77 @@
+@model Shop.ViewModels.EmployeeCreateVm
+@{
+    ViewData["Title"] = "Thêm nhân viên";
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Thêm nhân viên",
+    "Tạo hồ sơ nhân viên và gán tài khoản đăng nhập",
+    (string?)null,
+    (string?)null
+))
+
+<form asp-action="Create" method="post" class="form-card" novalidate>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="form-alert form-alert--danger"></div>
+
+    <fieldset class="form-section">
+        <legend>Thông tin cá nhân</legend>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="FullName" class="form-label">
+                    Họ tên <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="FullName" class="input" autofocus placeholder="VD: Nguyễn Văn An" autocomplete="name" />
+                <span asp-validation-for="FullName" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Phone" class="form-label">Điện thoại</label>
+                <input asp-for="Phone" class="input" type="tel" placeholder="VD: 0901 234 567" autocomplete="tel" />
+                <span asp-validation-for="Phone" class="form-error"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email" class="form-label">
+                Email <span class="req" aria-hidden="true">*</span>
+            </label>
+            <input asp-for="Email" class="input" type="email" placeholder="VD: an@shop.vn" autocomplete="email" />
+            <span asp-validation-for="Email" class="form-error"></span>
+        </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+        <legend>Tài khoản & trạng thái</legend>
+
+        <div class="form-group">
+            <label asp-for="UserId" class="form-label">
+                Tài khoản đăng nhập <span class="req" aria-hidden="true">*</span>
+            </label>
+            <input asp-for="UserId" class="input" placeholder="VD: nva.an" autocomplete="username" />
+            <span asp-validation-for="UserId" class="form-error"></span>
+            <p class="form-hint">Chỉ dùng chữ, số, dấu chấm, gạch dưới, gạch ngang (3–50 ký tự).</p>
+        </div>
+
+        <label class="form-check">
+            <input asp-for="IsActive" type="checkbox" />
+            <span>Nhân viên đang làm việc (có thể đăng nhập & lập hoá đơn)</span>
+        </label>
+    </fieldset>
+
+    <div class="form-actions">
+        <a href="@Url.Action("Employee", "Home")" class="btn btn--ghost">Huỷ</a>
+        <button type="submit" class="btn btn--primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Thêm nhân viên</span>
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

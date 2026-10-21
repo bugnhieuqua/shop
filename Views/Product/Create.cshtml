@@ -1,0 +1,93 @@
+@model Shop.ViewModels.ProductCreateVm
+@{
+    ViewData["Title"] = "Thêm sản phẩm";
+    var categories = ViewBag.Categories as List<Shop.Models.Category> ?? new List<Shop.Models.Category>();
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    "Thêm sản phẩm",
+    "Tạo sản phẩm mới trong hệ thống kho",
+    (string?)null,
+    (string?)null
+))
+
+<form asp-action="Create" method="post" class="form-card" enctype="multipart/form-data" novalidate>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="form-alert form-alert--danger"></div>
+
+    <fieldset class="form-section">
+        <legend>Thông tin cơ bản</legend>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">
+                    Tên sản phẩm <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="Name" class="input" autofocus placeholder="VD: iPhone 15 Pro Max" />
+                <span asp-validation-for="Name" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CategoryId" class="form-label">
+                    Danh mục <span class="req" aria-hidden="true">*</span>
+                </label>
+                <select asp-for="CategoryId" class="input">
+                    <option value="">— Chọn danh mục —</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" class="form-error"></span>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="Price" class="form-label">
+                    Đơn giá (VNĐ) <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="Price" class="input text-end" type="number" min="0" step="1000" placeholder="VD: 28990000" />
+                <span asp-validation-for="Price" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="StockQuantity" class="form-label">
+                    Số lượng tồn kho <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="StockQuantity" class="input text-end" type="number" min="0" placeholder="VD: 100" />
+                <span asp-validation-for="StockQuantity" class="form-error"></span>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+        <legend>Hình ảnh & Trạng thái</legend>
+
+        <div class="form-group">
+            <label asp-for="ImageFile" class="form-label">Ảnh sản phẩm</label>
+            <input asp-for="ImageFile" class="input" type="file" accept="image/*" />
+            <p class="form-hint">Hỗ trợ JPG, PNG, WEBP. Kích thước khuyến nghị 800x800px.</p>
+            <span asp-validation-for="ImageFile" class="form-error"></span>
+        </div>
+
+        <label class="form-check">
+            <input asp-for="IsActive" type="checkbox" checked />
+            <span>Mở bán sản phẩm này ngay (hiển thị trong danh sách bán hàng)</span>
+        </label>
+    </fieldset>
+
+    <div class="form-actions form-actions--sticky">
+        <a href="@Url.Action("Product", "Home")" class="btn btn--ghost">Huỷ</a>
+        <button type="submit" class="btn btn--primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Lưu sản phẩm</span>
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
