@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Data;
 using Shop.Models;
 
 namespace Shop.Controllers;
 
+[Authorize]
 public class CategoryController : Controller
 {
     // GET: /Category/Create

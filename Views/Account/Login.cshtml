@@ -1,0 +1,93 @@
+@model Shop.ViewModels.LoginVm
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - ShopAdmin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--color-bg);
+            padding: var(--space-4);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-md);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div style="text-align: center; margin-bottom: var(--space-5);">
+            <div style="width: 48px; height: 48px; margin: 0 auto var(--space-3); border-radius: var(--radius-input); background: var(--color-primary-soft); color: var(--color-primary); display: flex; align-items: center; justify-content: center;" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+            <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: var(--space-1);">ShopAdmin</h1>
+            <p style="font-size: 0.875rem; color: var(--color-muted);">Đăng nhập để vào trang quản trị cửa hàng</p>
+        </div>
+
+        <form asp-action="Login" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div asp-validation-summary="ModelOnly" class="form-alert form-alert--danger" style="margin-bottom: var(--space-4);"></div>
+
+            <div class="form-group" style="margin-bottom: var(--space-4);">
+                <label asp-for="UserId" class="form-label">
+                    Tài khoản nhân viên <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="UserId" class="input" placeholder="VD: u-an, u-binh..." autofocus aria-describedby="UserId-error" />
+                <span asp-validation-for="UserId" class="form-error" id="UserId-error"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: var(--space-5);">
+                <label asp-for="Password" class="form-label">
+                    Mật khẩu <span class="req" aria-hidden="true">*</span>
+                </label>
+                <input asp-for="Password" class="input" type="password" placeholder="Nhập mật khẩu (123456)" aria-describedby="Password-error" />
+                <span asp-validation-for="Password" class="form-error" id="Password-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn--primary" style="width: 100%; justify-content: center;">
+                <span>Đăng nhập</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+            <a href="@Url.Action("Index", "Store")" style="font-size: 0.875rem; color: var(--color-muted); text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-1);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Về trang chủ cửa hàng</span>
+            </a>
+        </div>
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

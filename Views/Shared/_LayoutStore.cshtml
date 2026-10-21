@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ShopStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body style="background-color: var(--color-bg); display: flex; flex-direction: column; min-height: 100vh;">
+    <!-- Storefront Header -->
+    <header style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 50;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: var(--space-3) var(--space-5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-3);">
+            <a asp-controller="Store" asp-action="Index" style="font-size: 1.375rem; font-weight: 800; color: var(--color-primary); text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-2);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                <span>ShopStore</span>
+            </a>
+
+            <nav style="display: flex; gap: var(--space-4); align-items: center;" aria-label="Điều hướng cửa hàng">
+                <a asp-controller="Store" asp-action="Index" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem;">Trang chủ</a>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Home" asp-action="Index" class="btn btn--ghost btn--sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>Vào Quản trị</span>
+                    </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn--outline btn--sm" aria-label="Đăng xuất tài khoản">Đăng xuất</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn--primary btn--sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        <span>Đăng nhập (Nhân viên)</span>
+                    </a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main style="max-width: 1200px; width: 100%; margin: 0 auto; padding: var(--space-5) var(--space-4); flex-grow: 1;">
+        <partial name="_Toast" />
+        @RenderBody()
+    </main>
+
+    <!-- Storefront Footer -->
+    <footer style="text-align: center; padding: var(--space-6) var(--space-4); color: var(--color-muted); font-size: 0.875rem; border-top: 1px solid var(--color-border); background: var(--color-surface); margin-top: auto;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            &copy; 2026 ShopStore. Hệ thống bán lẻ thiết bị công nghệ hiện đại.
+        </div>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

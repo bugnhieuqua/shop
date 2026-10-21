@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Data;
 using Shop.Models;
@@ -5,6 +6,7 @@ using Shop.ViewModels;
 
 namespace Shop.Controllers;
 
+[Authorize]
 public class ProductController : Controller
 {
     private readonly IWebHostEnvironment _env;

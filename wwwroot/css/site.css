@@ -1044,3 +1044,61 @@ body {
     animation: none;
   }
 }
+
+/* ============ Storefront Styles ============ */
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-5);
+}
+
+.store-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.store-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.store-detail-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.store-detail-image {
+  width: 100%;
+}
+
+.store-detail-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Storefront Mobile Responsive */
+@media (max-width: 768px) {
+  .store-detail-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    padding: var(--space-4) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .store-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 375px) {
+  .store-grid {
+    grid-template-columns: 1fr;
+  }
+  .store-detail-card {
+    padding: var(--space-3) !important;
+  }
+}
